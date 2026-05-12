@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Tracker Dashboard</title>
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --bg: #f4f7f6;
+            --text: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg) 0%, #e0eafc 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 30px auto;
+            flex-grow: 1;
+        }
+
+        /* Home View Styles */
+        #home-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 5px solid var(--primary);
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-bottom: 5px solid white;
+        }
+
+        /* Task View Styles */
+        #task-view {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .header-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background: #3b4096;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .location-item:hover {
+            background: #e9ecef;
+        }
+
+        .location-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .location-name {
+            font-size: 1.1rem;
+            flex-grow: 1;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .stat-updated { color: var(--success); }
+        .stat-not-updated { color: var(--danger); }
+
+        .not-updated-list {
+            list-style-type: none;
+            padding-left: 0;
+            color: var(--danger);
+        }
+
+        .not-updated-list li::before {
+            content: "• ";
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Team Tracker Dashboard</h1>
+    </header>
+
+    <div class="container">
+        <!-- Main Menu -->
+        <div id="home-view">
+            <div class="task-card" onclick="openTask('Morning Check In')">Morning Check In</div>
+            <div class="task-card" onclick="openTask('Outlet Visibility Check')">Outlet Visibility Check</div>
+            <div class="task-card" onclick="openTask('Sales Update 1pm')">Sales Update 1pm</div>
+            <div class="task-card" onclick="openTask('Final Sales Update')">Final Sales Update</div>
+        </div>
+
+        <!-- Task Details -->
+        <div id="task-view">
+            <div class="header-action">
+                <h2 id="current-task-title">Task Name</h2>
+                <button class="back-btn" onclick="goBack()">Back to Menu</button>
+            </div>
+
+            <div id="locations-container">
+                <!-- Location checkboxes will be generated here by JavaScript -->
+            </div>
+
+            <div class="summary-section">
+                <div class="summary-stats">
+                    <span class="stat-updated">Updated Locations Qty - <span id="updated-qty">0</span></span>
+                    <span class="stat-not-updated">Not Updated Location Qty - <span id="not-updated-qty">0</span></span>
+                </div>
+                
+                <h3>Not Update Location Names:</h3>
+                <br>
+                <ul class="not-updated-list" id="not-updated-list">
+                    <!-- Not updated list will be generated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Developed by Supun Dilshan</p>
+    </footer>
+
+    <script>
+        const locations = [
+            "Dialog - Mahiyanganaya (AMHY)",
+            "Dialog - Kegalle (AKGL)",
+            "Dialog - Mawanella (CMAW)",
+            "Dialog - Embilipitiya (LEMB)",
+            "Badulla Service Centre",
+            "Dialog - Warakapola (LWPL)",
+            "Dialog - Godakawela (ARAT)",
+            "Dialog - Avissawella (AAVS)",
+            "Dialog - Hatton (AHAT)",
+            "Dialog - Nuwara Eliya (ANEI)",
+            "Dialog - Bandarawela (ABWL)",
+            "Dialog - Welimada (DWLM)",
+            "Dialog - Wellawaya (AWLW)",
+            "Dialog - Monaragala (LMGL)",
+            "Dialog - Ruwanwella (5SRW)",
+            "Ratnapura Service Centre",
+            "Dialog - Pelmadulla (DPDL)"
+        ];
+
+        const tasks = [
+            "Morning Check In", 
+            "Outlet Visibility Check", 
+            "Sales Update 1pm", 
+            "Final Sales Update"
+        ];
+
+        let appState = {};
+        let currentActiveTask = "";
+
+        // UI Elements
+        const homeView = document.getElementById('home-view');
+        const taskView = document.getElementById('task-view');
+        const taskTitle = document.getElementById('current-task-title');
+        const locationsContainer = document.getElementById('locations-container');
+        const updatedQtyEl = document.getElementById('updated-qty');
+        const notUpdatedQtyEl = document.getElementById('not-updated-qty');
+        const notUpdatedListEl = document.getElementById('not-updated-list');
+
+        // Initialize Data and check for 10 PM Reset
+        function initializeData() {
+            const storedState = localStorage.getItem('teamTrackerState');
+            const lastSaveTime = localStorage.getItem('teamTrackerLastSave');
+            
+            let shouldReset = true;
+
+            if (storedState && lastSaveTime) {
+                const now = new Date();
+                const mostRecent10PM = new Date();
+                
+                // Set to Sri Lanka time implicitly via local browser time
+                if (now.getHours() >= 22) {
+                    // It is currently past 10 PM today
+                    mostRecent10PM.setHours(22, 0, 0, 0);
+                } else {
+                    // It is before 10 PM today, calculate yesterday's 10 PM
+                    mostRecent10PM.setDate(mostRecent10PM.getDate() - 1);
+                    mostRecent10PM.setHours(22, 0, 0, 0);
+                }
+
+                // If data was saved AFTER the most recent 10 PM, keep it
+                if (parseInt(lastSaveTime) > mostRecent10PM.getTime()) {
+                    shouldReset = false;
+                }
+            }
+
+            if (shouldReset) {
+                // Reset all data
+                tasks.forEach(task => {
+                    appState[task] = {};
+                    locations.forEach(loc => {
+                        appState[task][loc] = false; 
+                    });
+                });
+                saveData(); // Save the fresh reset state
+            } else {
+                // Load existing data for the day
+                appState = JSON.parse(storedState);
+            }
+        }
+
+        // Save data locally
+        function saveData() {
+            localStorage.setItem('teamTrackerState', JSON.stringify(appState));
+            localStorage.setItem('teamTrackerLastSave', new Date().getTime().toString());
+        }
+
+        // Background checker (runs every minute) to reset if tab is open exactly at 10:00 PM
+        function checkBackgroundReset() {
+            const now = new Date();
+            if (now.getHours() === 22 && now.getMinutes() === 0) {
+                initializeData();
+                if (taskView.style.display === 'block') {
+                    renderLocations();
+                }
+            }
+        }
+        setInterval(checkBackgroundReset, 60000);
+
+        function openTask(taskName) {
+            currentActiveTask = taskName;
+            taskTitle.innerText = taskName;
+            homeView.style.display = 'none';
+            taskView.style.display = 'block';
+            renderLocations();
+        }
+
+        function goBack() {
+            taskView.style.display = 'none';
+            homeView.style.display = 'grid';
+        }
+
+        function toggleLocation(locationName) {
+            appState[currentActiveTask][locationName] = !appState[currentActiveTask][locationName];
+            saveData(); // Save immediately when a tick is changed
+            updateSummary();
+        }
+
+        function renderLocations() {
+            locationsContainer.innerHTML = "";
+            locations.forEach(loc => {
+                const isChecked = appState[currentActiveTask][loc];
+                
+                const div = document.createElement('div');
+                div.className = 'location-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = isChecked;
+                checkbox.id = loc;
+                checkbox.onchange = () => toggleLocation(loc);
+
+                const label = document.createElement('label');
+                label.htmlFor = loc;
+                label.className = 'location-name';
+                label.innerText = loc;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                locationsContainer.appendChild(div);
+            });
+            updateSummary();
+        }
+
+        function updateSummary() {
+            let updatedCount = 0;
+            let notUpdatedCount = 0;
+            let notUpdatedHTML = "";
+
+            locations.forEach(loc => {
+                if (appState[currentActiveTask][loc]) {
+                    updatedCount++;
+                } else {
+                    notUpdatedCount++;
+                    notUpdatedHTML += `<li>${loc}</li>`;
+                }
+            });
+
+            updatedQtyEl.innerText = updatedCount;
+            notUpdatedQtyEl.innerText = notUpdatedCount;
+            notUpdatedListEl.innerHTML = notUpdatedHTML;
+        }
+
+        // Run on page load
+        initializeData();
+    </script>
+</body>
+</html>
