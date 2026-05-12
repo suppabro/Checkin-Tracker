@@ -6,9 +6,9 @@
     <title>Team Tracker Dashboard</title>
     <style>
         :root {
-            --primary: #4e54c8;
-            --secondary: #8f94fb;
-            --bg: #f4f7f6;
+            --primary: #1e4d58; 
+            --secondary: #3b8d9f;
+            --bg: #2C6F7D; 
             --text: #333;
             --card-bg: #ffffff;
             --success: #28a745;
@@ -23,7 +23,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg) 0%, #e0eafc 100%);
+            background-color: var(--bg); 
             color: var(--text);
             min-height: 100vh;
             display: flex;
@@ -32,7 +32,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: rgba(0, 0, 0, 0.2); 
             color: white;
             width: 100%;
             padding: 20px 0;
@@ -62,7 +62,7 @@
             border-radius: 15px;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             transition: transform 0.3s, box-shadow 0.3s;
             font-size: 1.2rem;
             font-weight: bold;
@@ -72,10 +72,53 @@
 
         .task-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border-bottom: 5px solid white;
+        }
+
+        /* Clock Styles */
+        .clock-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.2);
+            animation: fadeIn 1s ease-in;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .clock-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+
+        .clock-time {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .clock-time span {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .clock-date {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: 500;
+            letter-spacing: 1px;
         }
 
         /* Task View Styles */
@@ -84,7 +127,7 @@
             background: var(--card-bg);
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             animation: slideUp 0.5s ease-out;
         }
 
@@ -109,7 +152,7 @@
         }
 
         .back-btn:hover {
-            background: #3b4096;
+            background: var(--secondary);
         }
 
         .location-item {
@@ -175,8 +218,9 @@
             margin-top: 40px;
             padding: 20px;
             text-align: center;
-            color: #666;
+            color: #ffffff; 
             font-size: 0.9rem;
+            opacity: 0.8;
         }
 
         /* Animations */
@@ -201,12 +245,22 @@
     </header>
 
     <div class="container">
-        <!-- Main Menu -->
-        <div id="home-view">
-            <div class="task-card" onclick="openTask('Morning Check In')">Morning Check In</div>
-            <div class="task-card" onclick="openTask('Outlet Visibility Check')">Outlet Visibility Check</div>
-            <div class="task-card" onclick="openTask('Sales Update 1pm')">Sales Update 1pm</div>
-            <div class="task-card" onclick="openTask('Final Sales Update')">Final Sales Update</div>
+        
+        <!-- Main Menu & Clock Container -->
+        <div id="home-container">
+            <!-- Task Cards -->
+            <div id="home-view">
+                <div class="task-card" onclick="openTask('Morning Check In')">Morning Check In</div>
+                <div class="task-card" onclick="openTask('Outlet Visibility Check')">Outlet Visibility Check</div>
+                <div class="task-card" onclick="openTask('Sales Update 1pm')">Sales Update 1pm</div>
+                <div class="task-card" onclick="openTask('Final Sales Update')">Final Sales Update</div>
+            </div>
+
+            <!-- Beautiful Clock -->
+            <div class="clock-container">
+                <div class="clock-time" id="clock-time">00:00:00 <span>AM</span></div>
+                <div class="clock-date" id="clock-date">Loading...</div>
+            </div>
         </div>
 
         <!-- Task Details -->
@@ -271,7 +325,7 @@
         let currentActiveTask = "";
 
         // UI Elements
-        const homeView = document.getElementById('home-view');
+        const homeContainer = document.getElementById('home-container');
         const taskView = document.getElementById('task-view');
         const taskTitle = document.getElementById('current-task-title');
         const locationsContainer = document.getElementById('locations-container');
@@ -290,33 +344,27 @@
                 const now = new Date();
                 const mostRecent10PM = new Date();
                 
-                // Set to Sri Lanka time implicitly via local browser time
                 if (now.getHours() >= 22) {
-                    // It is currently past 10 PM today
                     mostRecent10PM.setHours(22, 0, 0, 0);
                 } else {
-                    // It is before 10 PM today, calculate yesterday's 10 PM
                     mostRecent10PM.setDate(mostRecent10PM.getDate() - 1);
                     mostRecent10PM.setHours(22, 0, 0, 0);
                 }
 
-                // If data was saved AFTER the most recent 10 PM, keep it
                 if (parseInt(lastSaveTime) > mostRecent10PM.getTime()) {
                     shouldReset = false;
                 }
             }
 
             if (shouldReset) {
-                // Reset all data
                 tasks.forEach(task => {
                     appState[task] = {};
                     locations.forEach(loc => {
                         appState[task][loc] = false; 
                     });
                 });
-                saveData(); // Save the fresh reset state
+                saveData(); 
             } else {
-                // Load existing data for the day
                 appState = JSON.parse(storedState);
             }
         }
@@ -339,22 +387,46 @@
         }
         setInterval(checkBackgroundReset, 60000);
 
+        // Clock Function
+        function updateClock() {
+            const now = new Date();
+            
+            // Time Formatting
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            document.getElementById('clock-time').innerHTML = `${hours}:${minutes}:${seconds} <span>${ampm}</span>`;
+
+            // Date Formatting
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call to show time immediately
+
         function openTask(taskName) {
             currentActiveTask = taskName;
             taskTitle.innerText = taskName;
-            homeView.style.display = 'none';
+            homeContainer.style.display = 'none'; // Hides both menu and clock
             taskView.style.display = 'block';
             renderLocations();
         }
 
         function goBack() {
             taskView.style.display = 'none';
-            homeView.style.display = 'grid';
+            homeContainer.style.display = 'block'; // Shows menu and clock again
         }
 
         function toggleLocation(locationName) {
             appState[currentActiveTask][locationName] = !appState[currentActiveTask][locationName];
-            saveData(); // Save immediately when a tick is changed
+            saveData(); 
             updateSummary();
         }
 
